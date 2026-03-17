@@ -1,0 +1,7 @@
+# Password Generator – Python dependencies
+# ─────────────────────────────────────────
+# Tkinter ships with the standard Python installer (no pip install needed).
+# Only the Flask web-version requires an external package.
+
+flask>=3.0.0
+pyperclip>=1.9.0   # optional: CLI clipboard support; GUI uses tkinter's own clipboard

@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SecurePass</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        /* Reset & Base */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0F111A;
+            --card-bg: #151722;
+            --input-bg: #202330;
+            --border: #2D3142;
+            --accent: #5B52ED;
+            --accent-hover: #4A42CD;
+            --text: #F8FAFC;
+            --muted: #8B949E;
+
+            --strength-weak: #EF4444;
+            --strength-fair: #F97316;
+            --strength-medium: #EAB308;
+            --strength-strong: #10B981;
+            --strength-vstrong: #22C55E;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            /* Soft mesh glow matching the desktop */
+            background-image:
+                radial-gradient(ellipse 50% 50% at 50% -10%, rgba(91, 82, 237, .15), transparent),
+                radial-gradient(ellipse 40% 40% at 80% 80%, rgba(91, 82, 237, .08), transparent);
+        }
+
+        /* Card */
+        .card {
+            width: 100%;
+            max-width: 580px;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Header */
+        .header {
+            margin-bottom: 24px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .header-title svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--accent);
+        }
+
+        .header-title h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            color: var(--muted);
+            font-size: 0.85rem;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        /* Output Row */
+        .output-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            align-items: stretch;
+        }
+
+        .pass-box {
+            flex: 1;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            letter-spacing: 0.1em;
+            transition: filter 0.2s;
+        }
+
+        .pass-box.hidden {
+            filter: blur(6px);
+            user-select: none;
+        }
+
+        .icon-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            border-radius: 8px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .icon-btn svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .icon-eye-filled {
+            fill: currentColor;
+            stroke: none;
+        }
+
+        /* Strength Bar */
+        .strength-wrapper {
+            margin-bottom: 24px;
+        }
+
+        .strength-labels {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .strength-text {
+            color: var(--strength-vstrong);
+        }
+
+        .entropy-text {
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .bar-track {
+            height: 6px;
+            background: var(--input-bg);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            width: 100%;
+            background: var(--strength-vstrong);
+            border-radius: 99px;
+            transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1), background 0.4s ease;
+        }
+
+        /* Section Labels */
+        .section-lbl {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--muted);
+            letter-spacing: 0.08em;
+            margin-bottom: 12px;
+            display: block;
+            text-transform: uppercase;
+        }
+
+        .section-lbl span.sub {
+            font-weight: 500;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        /* Slider Row */
+        .slider-section {
+            margin-bottom: 24px;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .slider-val {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--accent-hover);
+            min-width: 28px;
+            text-align: right;
+            margin-bottom: 2px;
+        }
+
+        input[type=range] {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 99px;
+            background: linear-gradient(to right, var(--accent) 0%, var(--accent) 20%, var(--input-bg) 20%, var(--input-bg) 100%);
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 4px solid var(--accent);
+            box-shadow: 0 0 0 2px var(--card-bg) inset;
+            /* Creates the hollow middle look */
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        /* Checkboxes */
+        .toggles-section {
+            margin-bottom: 24px;
+        }
+
+        .chk-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .chk-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            cursor: pointer;
+            user-select: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .chk-item:hover {
+            border-color: rgba(91, 82, 237, 0.5);
+        }
+
+        .chk-item input {
+            display: none;
+        }
+
+        .chk-box {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            border: 2px solid var(--border);
+            background: var(--input-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .chk-item.active {
+            border-color: var(--accent);
+            background: rgba(91, 82, 237, 0.05);
+        }
+
+        .chk-item.active .chk-box {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .chk-box svg {
+            width: 12px;
+            height: 12px;
+            stroke: #fff;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+            opacity: 0;
+        }
+
+        .chk-item.active .chk-box svg {
+            opacity: 1;
+        }
+
+        .chk-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        /* Generate Btn */
+        .generate-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            font-family: inherit;
+            background: linear-gradient(90deg, #6C4BE8, #4264F6);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: opacity 0.2s, transform 0.1s;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 14px rgba(91, 82, 237, 0.3);
+        }
+
+        .generate-btn:hover {
+            opacity: 0.9;
+        }
+
+        .generate-btn:active {
+            transform: scale(0.98);
+        }
+
+        .generate-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: #FBBF24;
+            stroke: none;
+        }
+
+        /* History */
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-item {
+            background: var(--input-bg);
+            border-radius: 6px;
+            padding: 12px 16px;
+            border: 1px solid transparent;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--muted);
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .history-item:hover {
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--accent);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 10px 24px;
+            border-radius: 99px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s, transform 0.3s;
+            box-shadow: 0 4px 14px rgba(91, 82, 237, 0.4);
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <main class="card" role="main">
+
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">
+                <svg viewBox="0 0 24 24" class="icon-eye-filled">
+                    <path
+                        d="M19 10h-1V7A6 6 0 0 0 7 7v3H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2V12a2 2 0 0 0-2-2zM9 7a4 4 0 1 1 8 0v3H9V7zm6 10a2 2 0 1 1-4 0v-2a2 2 0 1 1 4 0v2z" />
+                </svg>
+                <h1>SecurePass</h1>
+            </div>
+            <p>Cryptographically-strong passwords — generated in your browser, never sent anywhere.</p>
+        </div>
+
+        <!-- Output Row -->
+        <div class="output-row">
+            <div class="pass-box" id="passwordOutput" title="Click to copy" onclick="copyPassword()">••••••••••••••••
+            </div>
+            <button class="icon-btn" id="toggleBtn" onclick="toggleVisibility()" title="Show / Hide">
+                <svg viewBox="0 0 24 24" class="icon-eye-filled">
+                    <path
+                        d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                </svg>
+            </button>
+            <button class="icon-btn" onclick="copyPassword()" title="Copy">
+                <svg viewBox="0 0 24 24">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                    <path d="M9 14h6M9 10h6"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Strength -->
+        <div class="strength-wrapper">
+            <div class="strength-labels">
+                <span class="strength-text" id="strengthLabel">—</span>
+                <span class="entropy-text" id="entropyLabel">—</span>
+            </div>
+            <div class="bar-track">
+                <div class="bar-fill" id="strengthBar" style="width:0%; background:var(--muted)"></div>
+            </div>
+        </div>
+
+        <!-- Length Slider -->
+        <div class="slider-section">
+            <span class="section-lbl">Password Length</span>
+            <div class="slider-row">
+                <input type="range" id="lengthSlider" min="4" max="64" value="16" oninput="updateSlider(this)" />
+                <span class="slider-val" id="lengthVal">16</span>
+            </div>
+        </div>
+
+        <!-- Options -->
+        <div class="toggles-section">
+            <span class="section-lbl">Character Types</span>
+            <div class="chk-grid">
+                <label class="chk-item active" id="lblUpper">
+                    <input type="checkbox" id="useUpper" checked />
+                    <div class="chk-box"><svg viewBox="0 0 24 24">
+                            <path d="M20 6L9 17l-5-5" />
+                        </svg></div>
+                    <span class="chk-label">A–Z Uppercase</span>
+                </label>
+                <label class="chk-item active" id="lblLower">
+                    <input type="checkbox" id="useLower" checked />
+                    <div class="chk-box"><svg viewBox="0 0 24 24">
+                            <path d="M20 6L9 17l-5-5" />
+                        </svg></div>
+                    <span class="chk-label">a–z Lowercase</span>
+                </label>
+                <label class="chk-item active" id="lblDigits">
+                    <input type="checkbox" id="useDigits" checked />
+                    <div class="chk-box"><svg viewBox="0 0 24 24">
+                            <path d="M20 6L9 17l-5-5" />
+                        </svg></div>
+                    <span class="chk-label">0–9 Numbers</span>
+                </label>
+                <label class="chk-item active" id="lblSymbols">
+                    <input type="checkbox" id="useSymbols" checked />
+                    <div class="chk-box"><svg viewBox="0 0 24 24">
+                            <path d="M20 6L9 17l-5-5" />
+                        </svg></div>
+                    <span class="chk-label">!@# Symbols</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Generate -->
+        <button class="generate-btn" id="generateBtn" onclick="generatePassword()">
+            <svg viewBox="0 0 24 24">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+            Generate Password
+        </button>
+
+        <!-- History -->
+        <div class="history-section">
+            <span class="section-lbl">Recent Passwords <span class="sub">(click to copy)</span></span>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </main>
+
+    <!-- Toast -->
+    <div id="toast">Copied to clipboard!</div>
+
+    <script>
+        /* ── State ──────────────────────────────────────────────────── */
+        const historyState = [];
+        let hidden = false;
+        let lastPass = "";
+
+        const STRENGTH_COLORS = {
+            "Weak": "#EF4444",
+            "Fair": "#F97316",
+            "Medium": "#EAB308",
+            "Strong": "#10B981",
+            "Very Strong": "#22C55E",
+            "Unbreakable": "#22C55E",
+        };
+        const STRENGTH_WIDTH = { "Weak": 20, "Fair": 40, "Medium": 60, "Strong": 80, "Very Strong": 100, "Unbreakable": 100 };
+
+        /* ── Checkboxes ─────────────────────────────────────────────── */
+        document.querySelectorAll('.chk-item').forEach(lbl => {
+            lbl.addEventListener('click', () => {
+                const chk = lbl.querySelector('input');
+                setTimeout(() => lbl.classList.toggle('active', chk.checked), 0);
+            });
+        });
+
+        /* ── Slider ─────────────────────────────────────────────────── */
+        function updateSlider(el) {
+            document.getElementById('lengthVal').textContent = el.value;
+            const pct = ((el.value - el.min) / (el.max - el.min)) * 100;
+            el.style.background = `linear-gradient(to right, var(--accent) 0%, var(--accent) ${pct}%, var(--input-bg) ${pct}%, var(--input-bg) 100%)`;
+        }
+        updateSlider(document.getElementById('lengthSlider'));
+
+        /* ── Generate ───────────────────────────────────────────────── */
+        async function generatePassword() {
+            const btn = document.getElementById('generateBtn');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '⏳ Generating...';
+            btn.disabled = true;
+
+            const payload = {
+                length: parseInt(document.getElementById('lengthSlider').value),
+                use_upper: document.getElementById('useUpper').checked,
+                use_lower: document.getElementById('useLower').checked,
+                use_digits: document.getElementById('useDigits').checked,
+                use_symbols: document.getElementById('useSymbols').checked,
+            };
+
+            try {
+                const res = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                    return;
+                }
+
+                lastPass = data.password;
+                setDisplayPassword(lastPass);
+                updateStrength(data.strength, data.entropy);
+                addToHistory(data.password);
+            } catch (e) {
+                alert('Network error – is the Flask server running?');
+            } finally {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        }
+
+        /* ── UI Updaters ────────────────────────────────────────────── */
+        function setDisplayPassword(pwd) {
+            const el = document.getElementById('passwordOutput');
+            el.textContent = hidden ? pwd.replace(/./g, '•') : pwd;
+        }
+
+        function updateStrength(strength, entropy) {
+            const lbl = document.getElementById('strengthLabel');
+            const bar = document.getElementById('strengthBar');
+            const ent = document.getElementById('entropyLabel');
+
+            const color = STRENGTH_COLORS[strength] || '#8b949e';
+            const width = STRENGTH_WIDTH[strength] || 20;
+
+            lbl.textContent = strength;
+            lbl.style.color = color;
+            ent.textContent = `Entropy: ${entropy} bits`;
+            bar.style.width = width + '%';
+            bar.style.background = color;
+        }
+
+        function addToHistory(pwd) {
+            if (historyState.length > 0 && historyState[0] === pwd) return;
+            historyState.unshift(pwd);
+            if (historyState.length > 3) historyState.pop();
+            const cont = document.getElementById('historyList');
+            cont.innerHTML = '';
+            historyState.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.textContent = p;
+                div.title = 'Click to copy';
+                div.onclick = () => copyText(p);
+                cont.appendChild(div);
+            });
+        }
+
+        /* ── Copy ───────────────────────────────────────────────────── */
+        function copyPassword() {
+            if (!lastPass) return;
+            copyText(lastPass);
+        }
+
+        function copyText(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => showToast()).catch(() => fallbackCopy(text));
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text; document.body.appendChild(ta);
+            ta.select(); document.execCommand('copy');
+            document.body.removeChild(ta);
+            showToast();
+        }
+
+        /* ── Show/Hide ──────────────────────────────────────────────── */
+        function toggleVisibility() {
+            hidden = !hidden;
+            const el = document.getElementById('passwordOutput');
+            el.classList.toggle('hidden', hidden);
+
+            const btn = document.getElementById('toggleBtn');
+            if (hidden) {
+                btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22"></path></svg>`;
+            } else {
+                btn.innerHTML = `<svg viewBox="0 0 24 24" class="icon-eye-filled"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>`;
+            }
+            if (!hidden) setDisplayPassword(lastPass);
+        }
+
+        /* ── Toast ──────────────────────────────────────────────────── */
+        function showToast() {
+            const t = document.getElementById('toast');
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
+        }
+
+        /* Init */
+        window.addEventListener('DOMContentLoaded', generatePassword);
+    </script>
+</body>
+
+</html>
