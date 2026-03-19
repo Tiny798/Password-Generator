@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 """
 password_generator.py
 ─────────────────────
@@ -269,7 +268,6 @@ if __name__ == "__main__":
     print(f"Password : {result.password}")
     print(f"Entropy  : {result.entropy} bits")
     print(f"Strength : {result.strength} (score {result.score}/4)")
-=======
 """
 password_generator.py
 ─────────────────────
@@ -540,4 +538,3 @@ if __name__ == "__main__":
     print(f"Password : {result.password}")
     print(f"Entropy  : {result.entropy} bits")
     print(f"Strength : {result.strength} (score {result.score}/4)")
->>>>>>> c83d8f2cbbc873c011c33a36c4fa1118bed09959
