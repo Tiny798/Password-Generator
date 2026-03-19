@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Password Generator – Python dependencies
 # ─────────────────────────────────────────
 # Tkinter ships with the standard Python installer (no pip install needed).
@@ -6,7 +6,7 @@
 
 flask>=3.0.0
 pyperclip>=1.9.0   # optional: CLI clipboard support; GUI uses tkinter's own clipboard
-=======
+
 # Password Generator – Python dependencies
 # ─────────────────────────────────────────
 # Tkinter ships with the standard Python installer (no pip install needed).
@@ -14,4 +14,3 @@ pyperclip>=1.9.0   # optional: CLI clipboard support; GUI uses tkinter's own cli
 
 flask>=3.0.0
 pyperclip>=1.9.0   # optional: CLI clipboard support; GUI uses tkinter's own clipboard
->>>>>>> c83d8f2cbbc873c011c33a36c4fa1118bed09959
