@@ -1,5 +1,5 @@
 <<<<<<< HEAD
-# 🔐 SecurePass – Professional Password Generator
+# 🔐 SecurePass – Password Generator
 
 > A cryptographically-strong password generator with a **Flask web app**.
 
