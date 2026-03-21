@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # 🔐 SecurePass – Password Generator
 
 > A cryptographically-strong password generator with a **Flask web app**.
@@ -229,5 +229,5 @@ H = L × log₂(N)
 
 ---
 
-> **Built with Vaishnavi Pandav 
->>>>>>> c83d8f2cbbc873c011c33a36c4fa1118bed09959
+> **Built with Vaishnavi Pandav**
+
